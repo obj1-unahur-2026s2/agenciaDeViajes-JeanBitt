@@ -1,0 +1,59 @@
+import agenciaDeViajes.*
+
+
+describe "Calcular el valor final de un pack"{
+    const packNacionalSinB = new ViajesNacionales(provinciaDestino = "Entre Rios", actividades = [], duracion = 8, precioBase = 200, beneficiosEspeciales = [], coordinador = new Coordinador(viajesRealizados = 21, aniosExperiencia = 6, motivado = true, rol = guia))
+    const packNacionalCon2B  = new ViajesNacionales(provinciaDestino = "Entre Rios", actividades = [], duracion = 8, precioBase = 200, beneficiosEspeciales = [new BeneficioEspecial(tipoBeneficio = "Descuento", costo = 20, estaVigente = true), new BeneficioEspecial(tipoBeneficio = "Descuento en transporte", costo = 30, estaVigente = true)], coordinador = new Coordinador(viajesRealizados = 21, aniosExperiencia = 6, motivado = true, rol = guia))
+    const packInternacionalSinB = new ViajesInternacionales(paisDestino = "Brasil", escalas = 0, esDeInteres = true, duracion = 21, precioBase = 400, beneficiosEspeciales = [],  coordinador = new Coordinador(viajesRealizados = 21, aniosExperiencia = 6, motivado = true, rol = guia))
+
+    test "Un pack nacional sin beneficios vigentes devuelve el mismo precio base" {
+        assert.equals(packNacionalSinB.precioBase(), packNacionalSinB.calcularPrecioFinal())
+    }
+    
+    test "Un pack nacional con 2 beneficios vigentes suma correctamente sus costos al precio base" {
+        assert.equals(packNacionalCon2B.precioBase() + 50, packNacionalCon2B.calcularPrecioFinal())
+    }
+    
+    test "Un pack internacional sin beneficios vigentes calcula correctamente el total con el 20% de recargo" {
+        assert.equals(packInternacionalSinB.precioBase() * 1.2, packInternacionalSinB.calcularPrecioFinal())
+    }
+}   
+
+describe "Determinar si un coordinador esta altamente calificado" {
+    const unoCoordinador = new Coordinador(viajesRealizados = 21, aniosExperiencia = 6, motivado = true, rol = guia)
+    const dosCoordinador = new Coordinador(viajesRealizados = 50, aniosExperiencia = 1, motivado = true, rol = asistenteLogistico)
+    const tresCoordinador = new Coordinador(viajesRealizados = 21, aniosExperiencia = 4, motivado = false, rol = acompañante)
+    test "Un guia motivado con 21 viajes realizados es considerado altamente calificado" {
+        assert.that(unoCoordinador.esAltamenteCalificado())
+    }
+    test "Un asistente logistico con menos de 3 anios de experiencia no es calificado, aunque tenga muchos viajes" {
+        assert.notThat(dosCoordinador.esAltamenteCalificado())
+    }
+    test "Un acompaniante con cualquier cantidad de viaaajes es siempre calificado si supera los 20" {
+        assert.that(tresCoordinador.esAltamenteCalificado())
+    }
+}
+
+describe "Packs premiums" {
+    const unPack = new ViajesNacionales(provinciaDestino = "Buenos Aires", actividades = [], duracion = 11, precioBase = 200, beneficiosEspeciales = [], coordinador = new Coordinador(viajesRealizados = 21, aniosExperiencia = 6, motivado = true, rol = guia))
+    const otroPack = new ViajesInternacionales(paisDestino = "Brasil", escalas = 0, esDeInteres = true, duracion = 21, precioBase = 400, beneficiosEspeciales = [],  coordinador = new Coordinador(viajesRealizados = 21, aniosExperiencia = 6, motivado = true, rol = guia))
+
+    test "pack nacional con requisitos cumplidos es premium" {
+        assert.that(unPack.esPremium())
+    }
+    test "pack internacional con requisitos cumplidos es premium" {
+        assert.that(otroPack.esPremium())
+    }
+}
+
+describe "Packs provinciales" {
+    const packProvincial = new PacksProvinciales(provinciaDestino = "Buenos Aires", actividades = ["actividad1", "actividad2", "actividad3", "actividad4"], duracion = 11, precioBase = 200, beneficiosEspeciales = [new BeneficioEspecial(tipoBeneficio = "Descuento", costo = 20, estaVigente = true), new BeneficioEspecial(tipoBeneficio = "Descuento en transporte", costo = 30, estaVigente = true), new BeneficioEspecial(tipoBeneficio = "Descuento en alojamiento", costo = 50, estaVigente = true)], cantCiudadesAVisitar = 6, coordinador = new Coordinador(viajesRealizados = 21, aniosExperiencia = 6, motivado = true, rol = guia))
+
+    test "pack provincial con requisitos cumplidos es premium" {
+        assert.that(packProvincial.esPremium())
+    }
+    test "pack provincial premium calcula correctamente el precio final con recargo del 5%" {
+        assert.equals(packProvincial.calcularPrecioFinal(), (packProvincial.precioBase() + packProvincial.costoBeneficiosVigentes()) * 1.05)
+    }
+
+}
